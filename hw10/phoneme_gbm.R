@@ -1,0 +1,80 @@
+phoneme <-  read.table("~/stat852/data/phoneme.csv", header=TRUE, sep=",", na.strings=" ")
+
+
+kernels <- cbind("aa","ao","dcl", "iy", "sh")
+
+num<- cbind(0.2,0.6,0.8,1)
+Tree.siz <- cbind(1,5,10)
+Shrink <- cbind(0.001,0.01,0.1)
+sample.ratio <- cbind(0.25,0.5,0.75)
+
+iter=3
+phoneme.val <- matrix(NA,nrow = length(num)*length(Tree.siz)*length(Shrink)*length(sample.ratio),ncol=iter+4)
+library(gbm)
+for(i in 1:iter)
+{
+  resamp <- sample.int(n=nrow(phoneme), size= nrow(phoneme), replace=TRUE)
+  x.r <- phoneme[resamp,2:257]
+  y.r <- phoneme[resamp,258]
+  x.p <- phoneme[-unique(resamp),2:257]
+  y.p <- phoneme[-unique(resamp),258]
+  print("Start working!")
+  
+  ii = 1
+  for(siz in Tree.siz)
+    for(sh in Shrink)
+      for(rati in sample.ratio)
+      {
+        phoneme.boost <- gbm(data=data.frame(x.r,class=y.r), class ~., distribution="multinomial", 
+                             n.trees=2000, interaction.depth=siz,verbose=FALSE, shrinkage=sh,
+                             bag.fraction=rati, cv.folds=0,n.cores=48)
+        
+        
+        #phoneme.boost <- gbm(data=data.frame(x.r,class=y.r), class ~., distribution="multinomial", 
+        #                     n.trees=500, interaction.depth=10,verbose=FALSE, shrinkage=0.01,
+        #                     bag.fraction=0.5, cv.folds=0,n.cores=32)
+        
+        #phoneme.xg <- xgboost(data = as.matrix(x.r), label = as.numeric(y.r)-1, max.depth = 10, eta = 0.05, alpha=0.05,lambda=0.05,num_parallel_tree=10,
+        #                      nround = 20, 
+        #                      objective ="multi:softmax", num_class = 5, maximize=TRUE)
+        
+        phoneme.val[ii,1:4] <- c(siz,sh,rati,num[1]*2000)
+        phoneme.val[ii+1,1:4] <- c(siz,sh,rati,num[2]*2000)
+        phoneme.val[ii+2,1:4] <- c(siz,sh,rati,num[3]*2000)
+        phoneme.val[ii+3,1:4] <- c(siz,sh,rati,num[4]*2000)
+        
+
+
+
+
+      
+        pred.mul.val.1  <-  predict(phoneme.boost, newdata=x.p, n.trees=num[1]*2000, type="response")
+        pred.mul.val.2  <-  predict(phoneme.boost, newdata=x.p, n.trees=num[2]*2000, type="response")
+        pred.mul.val.3  <-  predict(phoneme.boost, newdata=x.p, n.trees=num[3]*2000, type="response")
+        pred.mul.val.4  <-  predict(phoneme.boost, newdata=x.p, n.trees=num[4]*2000, type="response")
+
+        class.mul.val.1 <- kernels[apply(pred.mul.val.1[,,1], 1, which.max)]
+        class.mul.val.2 <- kernels[apply(pred.mul.val.2[,,1], 1, which.max)]
+        class.mul.val.3 <- kernels[apply(pred.mul.val.3[,,1], 1, which.max)]
+        class.mul.val.4 <- kernels[apply(pred.mul.val.4[,,1], 1, which.max)]
+
+     phoneme.val[ii,i+4]     <- mean(ifelse(class.mul.val.1 == y.p, yes=0, no=1))
+     phoneme.val[ii+1,i+4]   <- mean(ifelse(class.mul.val.2 == y.p, yes=0, no=1))
+     phoneme.val[ii+2,i+4]   <- mean(ifelse(class.mul.val.3 == y.p, yes=0, no=1))
+     phoneme.val[ii+3,i+4]   <- mean(ifelse(class.mul.val.4 == y.p, yes=0, no=1))
+
+
+       ii <- ii + 4
+       
+       
+       print("finish one loop!")
+      }
+  
+
+      print("iteration finished once!")
+  Mean_val <- rowMeans(phoneme.val[,-c(1,2,3,4)])
+  best_index <- which.min(Mean_val)
+  best_para <- phoneme.val[best_index,1:4]
+  write.csv(phoneme.val,"~/stat852/hw10/gbm_val.csv")
+}
+
