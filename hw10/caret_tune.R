@@ -19,7 +19,8 @@ library(nnet)
 
 gbmGrid <-  expand.grid(interaction.depth = c(1, 5, 9),
                         n.trees = c(500,1000,1500,2000),
-                        shrinkage = c(0.001,0.01,0.1))
+                        shrinkage = c(0.001,0.01,0.1),
+                        n.minobsinnode=20)
 
 nnetGrid <- expand.grid(size = c(1, 5, 10,20,50),
                         decay=c(0.001,0.01,0.1))

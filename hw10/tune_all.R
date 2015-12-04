@@ -29,3 +29,5 @@ svm_para <- svm_val[svm_index,1:4]
 nnet_mean <- rowMeans(nnet_val[,-c(1,2)])
 nnet_index <- which.min(nnet_mean)
 nnet_para <- nnet_val[nnet_index,1:2]
+
+gbm_mmean <- matrix(gbm_mean,nrow = 3,ncol = 36)
