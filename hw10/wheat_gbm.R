@@ -82,5 +82,5 @@ write.csv(wheat.val,"~/stat852/hw10/wheat_gbm.csv")
 
 
 
-
+# Best Parameter   5.0e+00 1.0e-03 2.5e-01 3.0e+03
 

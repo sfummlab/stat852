@@ -115,27 +115,3 @@ for(i in 1:20)
   
   
 }
-
-
-
-#best  parameter 2 0.010
-
-
-root_MSPE <- sqrt(MSPE.nn)
-
-root_MSPE.nn <- sqrt(MSPE.nn.re)
-
-
-siz.dec <- paste(MSPE.nn[,1],MSPE.nn[,2])
-quartz(pointsize=6)
-boxplot.matrix(x=sqrt(MSPE.nn[,-c(1,2)]), use.cols=FALSE, names=siz.dec)
-
-
-quartz(pointsize=6)
-boxplot.matrix(x=sqrt(MSPE.nn.re[,-c(1,2)]), use.cols=FALSE, names=siz.dec)
-
-
-quartz(h=10, w=12, pointsize=11)
-boxplot(root_MSPE[,-c(1,2)])
-quartz(h=10, w=12, pointsize=11)
-boxplot(root_MSPE.nn[,-c(1,2)])

@@ -14,7 +14,7 @@ svm.miss.test.re <- rep(0,5)
 
 set.seed(67982193)
 
-
+kernels <- cbind("aa","ao","dcl", "iy", "sh")
 rescale.set1 <- function(x1,x2){
   minx <- apply(X=x1, MARGIN=2, FUN=min)
   maxx <- apply(X=x1, MARGIN=2, FUN=max)
@@ -82,7 +82,7 @@ for(i in 1:5)
     svm.miss.train[i] <- smse.svm
 
 
-    gbm.miss.test[i] <- mspe.gbm
+    gbm.miss.test[i] <- mspe.boost
     nnet.miss.test[i] <- mspe.nn
     svm.miss.test[i] <- mspe.svm
     
